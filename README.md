@@ -16,7 +16,7 @@ An interactive catalog of 58 materials with isometric and edge previews, selecta
 
 ## Publishing
 
-In the repository's **Settings → Pages**, choose **Deploy from a branch**, then **main** and **/ (root)**. Commits to the publishing branch update the site.
+The GitHub Actions workflow in `.github/workflows/pages.yml` publishes the static files when a commit reaches `main`. It can also be run manually from the Actions tab. Pages must be enabled with **GitHub Actions** as the publishing source.
 
 ## Using the settings
 
