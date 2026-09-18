@@ -1,5 +1,7 @@
 # CO₂ Laser Material Catalog
 
+[Open the material catalog](https://lasercut.localheist.com/)
+
 An interactive catalog of 58 materials with isometric and edge previews, selectable stock thickness, and cutting and engraving instructions.
 
 - Choose a rated CO₂ wattage: 40, 50, 60, 80, 100, or 120 W.
