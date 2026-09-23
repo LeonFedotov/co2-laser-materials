@@ -4,7 +4,7 @@
 
 export const catalogMeta = {
   title: 'CO₂ Material Catalog',
-  revision: '2026-09-18',
+  revision: '2026-09-23',
   machine: 'CO₂ glass-tube material reference; selectable rated wattage',
   units: {
     speed: 'mm/s',
@@ -213,7 +213,7 @@ export const materials = [
         materialGrade: 'MDF, ordinary laser-grade',
         method: 'Through cutting',
         thicknessMm: 3,
-        evidence: 'Published 60 W',
+        evidence: 'User-tested · 22 Sep 2026',
         speedMmPerSec: {
           min: 15,
           max: 20
@@ -223,20 +223,33 @@ export const materials = [
           max: 80
         },
         controllerPowerPercent: null,
-        passes: '1 to test',
+        passes: '1 tested',
         focusBelowTopMm: 0,
         lensInches: 2,
         intervalMm: null,
         dpi: null,
         airAssist: 'Firm, dry air',
-        betweenPasses: 'None initially',
-        notes: 'Power/speed published. Pass count and focus are proposed. Resin and density matter.',
+        betweenPasses: 'Not required for the reported single-pass through-cut',
+        notes: 'User confirmed on 22 Sep 2026 that 3 mm MDF cuts through in a single pass using the listed 60 W settings. The listed speed and power ranges are retained; the exact tested pair was not recorded. Verify the actual board grade and tube-current limit.',
         source: {
           title: 'STYLECNC, 60 W MDF / birch starting windows',
           url: 'https://www.stylecnc.com/blog/laser-cutting-mdf-vs-plywood.html',
           supports: 'STYLECNC, 60 W MDF / birch starting windows'
         },
-        testedRecipe: null,
+        testedRecipe: 'User-reported single-pass through-cut, tested 22 Sep 2026 using the listed 60 W settings; exact speed and power pair not recorded',
+        testDate: '2026-09-22',
+        testReport: {
+          date: '2026-09-22',
+          reportedBy: 'user',
+          laserWatts: 60,
+          thicknessMm: 3,
+          passes: 1,
+          outcome: 'Through cut',
+          settingsBasis: 'Listed catalog speed and power ranges',
+          exactSpeedMmPerSec: null,
+          exactPowerPercent: null,
+          controllerMinPowerPercent: null
+        },
         kerfMm: null
       },
       {
@@ -245,7 +258,7 @@ export const materials = [
         materialGrade: 'MDF, ordinary laser-grade',
         method: 'Through cutting',
         thicknessMm: 4,
-        evidence: 'Suggested test',
+        evidence: 'User-tested · 22 Sep 2026',
         speedMmPerSec: {
           min: 10,
           max: 15
@@ -255,20 +268,33 @@ export const materials = [
           max: 85
         },
         controllerPowerPercent: null,
-        passes: '1; inspect first',
+        passes: '1 tested',
         focusBelowTopMm: 0.5,
         lensInches: 2,
         intervalMm: null,
         dpi: null,
         airAssist: 'Firm, dry air',
-        betweenPasses: 'If almost through, test a second pass',
-        notes: 'Interpolated trial between published 3 and 6 mm recipes.',
+        betweenPasses: 'Not required for the reported single-pass through-cut',
+        notes: 'User confirmed on 22 Sep 2026 that 4 mm MDF cuts through in a single pass using the listed 60 W settings. The listed speed and power ranges are retained; the exact tested pair was not recorded. Verify the actual board grade and tube-current limit.',
         source: {
           title: 'Assistant-proposed numbers. Source supports material / nearby recipe: STYLECNC, 60 W MDF / birch starting windows',
           url: 'https://www.stylecnc.com/blog/laser-cutting-mdf-vs-plywood.html',
           supports: 'Assistant-proposed numbers. Source supports material / nearby recipe: STYLECNC, 60 W MDF / birch starting windows'
         },
-        testedRecipe: null,
+        testedRecipe: 'User-reported single-pass through-cut, tested 22 Sep 2026 using the listed 60 W settings; exact speed and power pair not recorded',
+        testDate: '2026-09-22',
+        testReport: {
+          date: '2026-09-22',
+          reportedBy: 'user',
+          laserWatts: 60,
+          thicknessMm: 4,
+          passes: 1,
+          outcome: 'Through cut',
+          settingsBasis: 'Listed catalog speed and power ranges',
+          exactSpeedMmPerSec: null,
+          exactPowerPercent: null,
+          controllerMinPowerPercent: null
+        },
         kerfMm: null
       },
       {
