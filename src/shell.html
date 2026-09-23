@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CO₂ Material Catalog</title>
+<meta name="description" content="Your CO₂ material catalog: laser profiles, exact test history, quicklists and LightBurn libraries.">
+<style>html{color-scheme:light dark}body{margin:0;background:light-dark(#e2e7da,#0f1613)}.catalog-document{max-width:1180px;margin:0 auto}/* STYLES */</style>
+<script>/* ICONS */</script>
+<!-- ANALYTICS -->
+</head>
+<body><div class="catalog-document"><div id="laser-catalog-v4">
+  <header class="lc-heading">
+    <div class="lc-topline"><p class="lc-eyebrow"><i data-lucide="layers-3"></i> CO₂ MATERIAL CATALOG</p><button class="lc-btn lc-quiet" data-action="workspace"><i data-lucide="hard-drive"></i><span id="save-state">Saved on this device</span></button></div>
+    <h1>Material settings, at a glance.</h1>
+    <p class="lc-intro">Find a starting point. Test your stock. Keep what works.</p>
+    <div class="lc-machine-strip">
+      <label>Active laser<select id="profile-select"></select></label>
+      <p id="profile-summary"></p>
+      <button class="lc-btn" data-action="profile"><i data-lucide="sliders-horizontal"></i>Laser setup</button>
+    </div>
+    <div class="lc-toolbar">
+      <label class="lc-search"><i data-lucide="search"></i>Search materials<input type="search" id="catalog-search" placeholder="MDF, acrylic, glass…" autocomplete="off"></label>
+      <label>Material family<select id="catalog-family"><option value="">All families</option></select></label>
+      <div class="lc-toolbar-actions"><button class="lc-btn" data-action="add-material"><i data-lucide="plus"></i>Add material</button><button class="lc-btn lc-primary" data-action="export"><i data-lucide="download"></i>Export library</button></div>
+    </div>
+    <div class="lc-options">
+      <label class="lc-check"><input type="checkbox" id="quick-only">Quicklist only</label>
+      <label class="lc-check"><input type="checkbox" id="estimates">Allow speed estimates</label>
+      <button class="lc-btn lc-quiet" data-action="archive-view"><i data-lucide="archive"></i>Archive <span id="archive-count"></span></button>
+    </div>
+    <p class="lc-wattage-note" id="reference-note"></p>
+  </header>
+  <section class="lc-quicklist" id="quicklist" aria-label="Quicklist"></section>
+  <div class="lc-resultbar"><strong id="material-count"></strong><span>Square samples · choose one thickness · cut + engrave together</span></div>
+  <main class="lc-list" id="material-list" aria-label="Material catalog"></main>
+  <footer class="lc-footer"><p>References are machine-specific starting points. Keep the tube-current limit, qualify the complete material and use suitable source extraction. Grain and layer counts are illustrative.</p><p><a href="https://github.com/LeonFedotov/co2-laser-materials" target="_blank" rel="noopener noreferrer">Source & documentation</a> · <button class="lc-text-btn" data-action="workspace">Backup, restore & sync</button></p></footer>
+  <div id="toast" class="lc-toast" role="status" hidden></div>
+  <dialog id="panel" aria-labelledby="panel-title"><div class="lc-dialog-head"><div><p class="lc-eyebrow" id="panel-eyebrow">YOUR WORKSPACE</p><h2 id="panel-title"></h2></div><button class="lc-btn lc-icon-btn" data-action="close" aria-label="Close panel"><i data-lucide="x"></i></button></div><div id="panel-body"></div></dialog>
+  <noscript><p>This catalog needs JavaScript to display material settings.</p></noscript>
+  <script>(() => { /* APPLICATION */ })();</script>
+</div></div></body>
+</html>

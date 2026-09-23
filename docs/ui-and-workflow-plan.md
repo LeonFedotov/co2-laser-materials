@@ -1,6 +1,6 @@
 # UI and workflow plan
 
-Status: proposed product and UX plan; implementation stages below are not a completion report.
+Status: implemented on 23 September 2026, with test-project export labeled beta pending native LightBurn desktop import verification. See [implementation notes](implementation-notes.md) for supported formats and remaining limits.
 Recorded: 23 September 2026.
 Scope: extend the existing CO₂ material catalog at https://lasercut.localheist.com/.
 
@@ -202,12 +202,13 @@ Reference:
 
 ## Suggested delivery order
 
-- [ ] Prototype the laser setup panel and Record test flow first.
-- [ ] Establish the profile, recipe and test-history data relationships and persistence behavior.
-- [ ] Add material creation/editing, archive/restore and quicklist behavior.
-- [ ] Add selectable LightBurn library export with counts, filters and explicit range conversion.
-- [ ] Add test-project generation and the grid-cell-to-test-record workflow.
-- [ ] Add authenticated synchronization and shared publishing after choosing the storage approach.
+- [x] Prototype the laser setup panel and Record test flow first.
+- [x] Establish the profile, recipe and test-history data relationships and persistence behavior.
+- [x] Add material creation/editing, archive/restore and quicklist behavior.
+- [x] Add selectable LightBurn library export with counts, filters and explicit range conversion.
+- [x] Add test-project generation and the grid-cell-to-test-record workflow (beta export).
+- [x] Add optional authenticated GitHub synchronization through a private repository and owner-only shared publishing.
+- [ ] Verify generated `.lbrn2` projects in the native LightBurn desktop application.
 
 ## Completion checks
 

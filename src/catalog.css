@@ -1,0 +1,238 @@
+#laser-catalog-v4 {
+      --lc-bg: light-dark(#f4f4ec, #151d1b);
+      --lc-panel: light-dark(#fffef8, #202b27);
+      --lc-ink: light-dark(#27382d, #e9eee5);
+      --lc-soft: light-dark(#586959, #b5c2b4);
+      --lc-line: light-dark(#d7ded0, #3b4b40);
+      --lc-tint: light-dark(#e8eddf, #28372d);
+      --lc-accent: light-dark(#365c42, #c4dcc0);
+      --lc-red: light-dark(#a92d32, #ffb8b4);
+      --lc-red-bg: light-dark(#fbe9e5, #482929);
+      --lc-red-line: light-dark(#edc6bf, #73413e);
+      --lc-amber: light-dark(#875713, #f2cd85);
+      --lc-amber-bg: light-dark(#fff0d4, #41341e);
+      color: var(--lc-ink);
+      background: var(--lc-bg);
+      font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      container-type: inline-size;
+      container-name: laser;
+      width: 100%;
+      box-sizing: border-box;
+      overflow-wrap: anywhere;
+    }
+    #laser-catalog-v4 * { box-sizing: border-box; }
+    #laser-catalog-v4 [hidden] { display: none !important; }
+    #laser-catalog-v4 h1, #laser-catalog-v4 h2, #laser-catalog-v4 h3, #laser-catalog-v4 p { margin: 0; }
+    #laser-catalog-v4 button, #laser-catalog-v4 input, #laser-catalog-v4 select { font: inherit; color: inherit; }
+    #laser-catalog-v4 button:focus-visible, #laser-catalog-v4 summary:focus-visible, #laser-catalog-v4 a:focus-visible { outline: 3px solid var(--lc-accent); outline-offset: 3px; }
+    #laser-catalog-v4 a { color: var(--lc-accent); text-underline-offset: 3px; }
+    #laser-catalog-v4 .lc-heading { padding: 23px 26px 17px; border-bottom: 1px solid var(--lc-line); }
+    #laser-catalog-v4 .lc-eyebrow { display: flex; align-items: center; gap: 8px; color: var(--lc-soft); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 9px; }
+    #laser-catalog-v4 .lc-eyebrow svg { width: 17px; height: 17px; }
+    #laser-catalog-v4 h1 { font: 500 32px/1.15 ui-serif, Georgia, serif; letter-spacing: -0.025em; }
+    #laser-catalog-v4 .lc-intro { color: var(--lc-soft); font-size: 13px; margin-top: 7px; }
+    #laser-catalog-v4 .lc-toolbar { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(145px, 185px) minmax(140px, 185px); gap: 12px; margin-top: 18px; }
+    #laser-catalog-v4 label { display: block; font-size: 11px; font-weight: 500; color: var(--lc-soft); }
+    #laser-catalog-v4 input:not([type="checkbox"]), #laser-catalog-v4 select { display: block; width: 100%; min-width: 0; min-height: 40px; border: 1px solid var(--lc-line); border-radius: 6px; background: var(--lc-panel); padding: 8px 10px; font-size: 14px; margin-top: 4px; }
+    #laser-catalog-v4 .lc-search { position: relative; }
+    #laser-catalog-v4 .lc-search > svg { position: absolute; width: 17px; height: 17px; left: 10px; bottom: 12px; color: var(--lc-soft); }
+    #laser-catalog-v4 .lc-search input { padding-left: 34px; }
+    #laser-catalog-v4 .lc-power-label { color: var(--lc-ink); }
+    #laser-catalog-v4 .lc-power-label select { border-color: var(--lc-accent); }
+    #laser-catalog-v4 .lc-options { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-top: 11px; color: var(--lc-soft); font-size: 11px; }
+    #laser-catalog-v4 .lc-estimate-check { display: inline-flex; align-items: center; gap: 7px; min-height: 30px; font-size: 12px; font-weight: 400; }
+    #laser-catalog-v4 .lc-estimate-check input { width: 17px; height: 17px; margin: 0; accent-color: var(--lc-accent); }
+    #laser-catalog-v4 .lc-wattage-note { color: var(--lc-soft); font-size: 11px; margin-top: 4px; }
+    #laser-catalog-v4 .lc-resultbar { padding: 12px 26px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; color: var(--lc-soft); font-size: 11px; border-bottom: 1px solid var(--lc-line); }
+    #laser-catalog-v4 .lc-resultbar strong { font-weight: 500; color: var(--lc-ink); }
+    #laser-catalog-v4 .lc-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 15px; padding: 20px 26px; }
+    #laser-catalog-v4 .lc-material { min-width: 0; border: 1px solid var(--lc-line); border-radius: 9px; background: var(--lc-panel); }
+    #laser-catalog-v4 .lc-material[data-expanded="true"] { grid-column: 1 / -1; display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 17px; padding: 13px; border-color: var(--lc-accent); }
+    #laser-catalog-v4 .lc-tile-button { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 9px; aspect-ratio: 1 / 1; width: 100%; min-width: 0; padding: 15px; border: 0; border-radius: 9px; background: transparent; text-align: left; }
+    #laser-catalog-v4 .lc-tile-button:hover, #laser-catalog-v4 .lc-tile-button[aria-expanded="true"] { background: var(--lc-tint); }
+    #laser-catalog-v4 .lc-material[data-expanded="true"] .lc-tile-button { aspect-ratio: auto; align-self: start; min-height: 0; padding: 10px; grid-template-rows: auto 112px auto; gap: 7px; }
+    #laser-catalog-v4 .lc-tile-heading { display: flex; gap: 8px; align-items: flex-start; min-width: 0; }
+    #laser-catalog-v4 .lc-tile-heading > svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; }
+    #laser-catalog-v4 .lc-tile-name { font-size: 15px; line-height: 1.25; font-weight: 500; flex: 1; min-width: 0; }
+    #laser-catalog-v4 .lc-material[data-expanded="true"] .lc-tile-name { font-size: 13px; }
+    #laser-catalog-v4 .lc-tile-chevron { margin-left: auto; color: var(--lc-soft); }
+    #laser-catalog-v4 .lc-tile-button[aria-expanded="true"] .lc-tile-chevron { transform: rotate(180deg); }
+    #laser-catalog-v4 .lc-tile-pictures { display: grid; grid-template-rows: minmax(0, 1fr) 28px; gap: 5px; min-height: 0; }
+    #laser-catalog-v4 .lc-tile-isometric { display: block; min-width: 0; min-height: 0; }
+    #laser-catalog-v4 .material-specimen { display: block; width: 100%; height: 100%; overflow: visible; }
+    #laser-catalog-v4 .lc-tile-profile { display: grid; grid-template-columns: 27px minmax(0, 1fr); gap: 6px; align-items: center; min-height: 0; font-size: 11px; color: var(--lc-soft); }
+    #laser-catalog-v4 .lc-tile-profile > span:last-child { display: block; height: 25px; min-width: 0; }
+    #laser-catalog-v4 .material-profile { display: block; width: 100%; height: 100%; }
+    #laser-catalog-v4 .lc-tile-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 5px; font-size: 11px; color: var(--lc-soft); }
+    #laser-catalog-v4 .lc-tile-depth { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    #laser-catalog-v4 .lc-red-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; font-size: 11px; font-weight: 500; background: var(--lc-red-bg); color: var(--lc-red); border: 1px solid var(--lc-red-line); border-radius: 4px; }
+    #laser-catalog-v4 .lc-red-tag svg { width: 12px; height: 12px; flex-shrink: 0; }
+    #laser-catalog-v4 .lc-detail-panel { min-width: 0; }
+    #laser-catalog-v4 .lc-panel-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 31px; margin-bottom: 8px; }
+    #laser-catalog-v4 .lc-panel-bar h2 { font-size: 13px; font-weight: 500; }
+    #laser-catalog-v4 .lc-collapse { display: inline-flex; align-items: center; gap: 4px; padding: 5px 7px; min-height: 30px; border: 0; border-radius: 4px; color: var(--lc-soft); background: transparent; font-size: 11px; }
+    #laser-catalog-v4 .lc-collapse svg { width: 14px; height: 14px; }
+    #laser-catalog-v4 .lc-hazard { font-size: 12px; color: var(--lc-red); border-left: 3px solid var(--lc-red); padding: 6px 9px; background: var(--lc-red-bg); margin-bottom: 10px; }
+    #laser-catalog-v4 .lc-processes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    #laser-catalog-v4 .lc-process { min-width: 0; }
+    #laser-catalog-v4 h3 { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; margin-bottom: 7px; }
+    #laser-catalog-v4 h3 svg { width: 16px; height: 16px; }
+    #laser-catalog-v4 .lc-local-select { margin-bottom: 9px; }
+    #laser-catalog-v4 .lc-evidence { font-size: 11px; color: var(--lc-soft); padding: 6px 0; border-top: 1px solid var(--lc-line); }
+    #laser-catalog-v4 .lc-evidence[data-kind="estimate"] { color: var(--lc-amber); background: var(--lc-amber-bg); padding: 6px 7px; border-top: 0; border-radius: 4px; }
+    #laser-catalog-v4 .lc-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 10px; margin: 0; padding: 5px 0 9px; font-variant-numeric: tabular-nums; }
+    #laser-catalog-v4 .lc-settings dt { font-size: 11px; color: var(--lc-soft); }
+    #laser-catalog-v4 .lc-settings dd { margin: 2px 0 0; font-size: 13px; font-weight: 500; }
+    #laser-catalog-v4 .lc-subvalue { font-size: 11px; color: var(--lc-soft); font-weight: 400; }
+    #laser-catalog-v4 .lc-recipe-detail { border-top: 1px solid var(--lc-line); font-size: 12px; }
+    #laser-catalog-v4 summary { color: var(--lc-accent); padding: 7px 0; font-size: 11px; }
+    #laser-catalog-v4 details[open] > summary { margin-bottom: 3px; }
+    #laser-catalog-v4 .lc-recipe-detail p { margin: 0 0 7px; }
+    #laser-catalog-v4 .lc-recipe-detail label { margin: 5px 0 9px; }
+    #laser-catalog-v4 .lc-recipe-detail a { overflow-wrap: anywhere; }
+    #laser-catalog-v4 .lc-minor { font-size: 11px; color: var(--lc-soft); }
+    #laser-catalog-v4 .lc-no-settings { color: var(--lc-soft); font-size: 12px; padding: 8px 0; border-top: 1px solid var(--lc-line); }
+    #laser-catalog-v4 .lc-no-settings p + p { margin-top: 7px; }
+    #laser-catalog-v4 .lc-unverified { color: var(--lc-amber); font-size: 11px; margin: 5px 0 7px; }
+    #laser-catalog-v4 .lc-material-info { border-top: 1px solid var(--lc-line); margin-top: 8px; font-size: 12px; }
+    #laser-catalog-v4 .lc-material-info p { margin: 5px 0 8px; }
+    #laser-catalog-v4 .lc-material-info label { max-width: 210px; margin: 7px 0; }
+    #laser-catalog-v4 .lc-warning-detail { color: var(--lc-red); }
+    #laser-catalog-v4 .lc-warning-detail a { color: var(--lc-red); }
+    #laser-catalog-v4 .lc-no-results { grid-column: 1 / -1; padding: 30px 0; color: var(--lc-soft); }
+    #laser-catalog-v4 .lc-footer { padding: 12px 26px 20px; color: var(--lc-soft); font-size: 11px; }
+    #laser-catalog-v4 .lc-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @container laser (min-width: 1100px) { #laser-catalog-v4 .lc-list { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    @container laser (min-width: 901px) { #laser-catalog-v4 .lc-settings { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @container laser (max-width: 900px) {
+      #laser-catalog-v4 .lc-list { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 18px 20px; }
+      #laser-catalog-v4 .lc-heading, #laser-catalog-v4 .lc-resultbar, #laser-catalog-v4 .lc-footer { padding-left: 20px; padding-right: 20px; }
+      #laser-catalog-v4 .lc-material[data-expanded="true"] { grid-template-columns: 155px minmax(0, 1fr); gap: 12px; }
+      #laser-catalog-v4 .lc-processes { gap: 12px; }
+      #laser-catalog-v4 .lc-toolbar { grid-template-columns: minmax(160px, 1fr) minmax(125px, 165px) minmax(130px, 165px); }
+    }
+    @container laser (max-width: 700px) {
+      #laser-catalog-v4 .lc-material[data-expanded="true"] { display: block; padding: 12px; }
+      #laser-catalog-v4 .lc-material[data-expanded="true"] .lc-tile-button { grid-template-columns: 110px minmax(0, 1fr); grid-template-rows: auto auto; gap: 8px 13px; padding: 7px; margin-bottom: 8px; }
+      #laser-catalog-v4 .lc-material[data-expanded="true"] .lc-tile-pictures { grid-column: 1; grid-row: 1 / span 2; height: 100px; }
+      #laser-catalog-v4 .lc-material[data-expanded="true"] .lc-tile-heading { grid-column: 2; grid-row: 1; align-self: end; }
+      #laser-catalog-v4 .lc-material[data-expanded="true"] .lc-tile-footer { grid-column: 2; grid-row: 2; align-self: start; justify-content: flex-start; }
+      #laser-catalog-v4 .lc-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #laser-catalog-v4 .lc-search { grid-column: 1 / -1; }
+    }
+    @container laser (max-width: 480px) {
+      #laser-catalog-v4 h1 { font-size: 28px; }
+      #laser-catalog-v4 .lc-list { grid-template-columns: minmax(0, 1fr); padding: 15px; }
+      #laser-catalog-v4 .lc-heading, #laser-catalog-v4 .lc-resultbar, #laser-catalog-v4 .lc-footer { padding-left: 15px; padding-right: 15px; }
+      #laser-catalog-v4 .lc-processes { grid-template-columns: 1fr; gap: 14px; }
+      #laser-catalog-v4 .lc-process + .lc-process { border-top: 1px solid var(--lc-line); padding-top: 12px; }
+      #laser-catalog-v4 .lc-settings { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      #laser-catalog-v4 .lc-settings dd { font-size: 12px; }
+      #laser-catalog-v4 .lc-panel-bar { align-items: start; }
+      #laser-catalog-v4 input:not([type="checkbox"]), #laser-catalog-v4 select { font-size: 16px; min-height: 44px; }
+    }
+    @media (pointer: coarse) {
+      #laser-catalog-v4 .lc-collapse, #laser-catalog-v4 summary, #laser-catalog-v4 .lc-estimate-check { min-height: 44px; }
+      #laser-catalog-v4 summary { padding-top: 12px; }
+      #laser-catalog-v4 input:not([type="checkbox"]), #laser-catalog-v4 select { min-height: 44px; font-size: 16px; }
+    }
+/* Workspace controls and compact side panels */
+#laser-catalog-v4 .lc-json-review {font-size:11px;max-height:300px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+#laser-catalog-v4 button, #laser-catalog-v4 summary { cursor:pointer }
+#laser-catalog-v4 svg.lucide { width:16px;height:16px;flex-shrink:0 }
+#laser-catalog-v4 .lc-btn {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:8px 11px;border:1px solid var(--lc-line);border-radius:6px;background:var(--lc-panel);font-size:12px;font-weight:500;white-space:normal}
+#laser-catalog-v4 .lc-btn:hover {background:var(--lc-tint)}
+#laser-catalog-v4 .lc-btn:disabled {opacity:.5;cursor:not-allowed}
+#laser-catalog-v4 .lc-primary {background:var(--lc-ink);color:var(--lc-panel);border-color:var(--lc-ink)}
+#laser-catalog-v4 .lc-primary:hover {background:var(--lc-accent);color:var(--lc-panel)}
+#laser-catalog-v4 .lc-quiet {background:transparent;border-color:transparent;color:var(--lc-soft)}
+#laser-catalog-v4 .lc-text-btn {border:0;padding:0;background:transparent;color:var(--lc-accent);text-decoration:underline;text-underline-offset:3px}
+#laser-catalog-v4 .lc-icon-btn {padding:7px;min-width:38px}
+#laser-catalog-v4 .lc-topline {display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#laser-catalog-v4 .lc-topline .lc-eyebrow {margin:0}
+#laser-catalog-v4 h1 {margin-top:9px}
+#laser-catalog-v4 .lc-machine-strip {display:flex;gap:16px;align-items:center;margin-top:20px;padding:12px;background:var(--lc-tint);border-radius:8px}
+#laser-catalog-v4 .lc-machine-strip label {width:200px;flex-shrink:0}
+#laser-catalog-v4 .lc-machine-strip p {font-size:12px;color:var(--lc-soft);flex:1}
+#laser-catalog-v4 .lc-toolbar {grid-template-columns:minmax(150px,1fr) 160px auto;align-items:end}
+#laser-catalog-v4 .lc-toolbar-actions {display:flex;gap:7px;flex-wrap:wrap}
+#laser-catalog-v4 .lc-toolbar-actions .lc-btn {min-height:40px}
+#laser-catalog-v4 .lc-check {display:inline-flex;gap:8px;align-items:center;min-height:34px;font-size:12px;font-weight:400;cursor:pointer}
+#laser-catalog-v4 input[type=checkbox] {width:17px;height:17px;accent-color:var(--lc-accent);flex-shrink:0}
+#laser-catalog-v4 .lc-quicklist {padding:15px 26px;border-bottom:1px solid var(--lc-line)}
+#laser-catalog-v4 .lc-quick-title {display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+#laser-catalog-v4 .lc-quick-items {display:flex;gap:8px;overflow:auto;padding:2px 1px 5px}
+#laser-catalog-v4 .lc-pin-item {display:flex;flex:0 0 auto;max-width:310px;border:1px solid var(--lc-line);border-radius:6px;background:var(--lc-panel)}
+#laser-catalog-v4 .lc-pin-item>button {border:0;background:transparent;padding:9px 10px;text-align:left;color:var(--lc-ink)}
+#laser-catalog-v4 .lc-pin-item small {display:block;color:var(--lc-soft);margin-top:2px}
+#laser-catalog-v4 .lc-pin-item[data-stale=true] {border-color:var(--lc-red-line)}
+#laser-catalog-v4 .lc-tile-wrap {position:relative;min-width:0}
+#laser-catalog-v4 .lc-tile-heading {padding-right:24px}
+#laser-catalog-v4 .lc-card-menu {position:absolute;right:6px;top:5px;z-index:1}
+#laser-catalog-v4 .lc-card-menu>summary {list-style:none;padding:8px;line-height:1;border-radius:5px}
+#laser-catalog-v4 .lc-card-menu>summary::-webkit-details-marker {display:none}
+#laser-catalog-v4 .lc-card-menu[open]>summary {background:var(--lc-tint)}
+#laser-catalog-v4 .lc-menu-items {position:absolute;right:0;top:36px;background:var(--lc-panel);padding:6px;min-width:155px;border:1px solid var(--lc-line);border-radius:8px;box-shadow:0 8px 28px #0002}
+#laser-catalog-v4 .lc-menu-items button {width:100%;justify-content:flex-start}
+#laser-catalog-v4 .lc-process-actions {display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}
+#laser-catalog-v4 .lc-process-actions .lc-btn {font-size:11px;padding:6px 8px;min-height:32px}
+#laser-catalog-v4 .lc-inline-fields {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+#laser-catalog-v4 .lc-evidence[data-kind=tested], #laser-catalog-v4 .lc-positive {color:var(--lc-accent);background:var(--lc-tint);padding:6px 8px;border-radius:4px}
+#laser-catalog-v4 .lc-history-item {padding:10px 0;border-top:1px solid var(--lc-line);font-size:12px}
+#laser-catalog-v4 .lc-history-item p {margin:5px 0}
+#laser-catalog-v4 .lc-photo {max-width:100%;max-height:240px;object-fit:contain;border-radius:5px}
+#laser-catalog-v4 dialog {padding:0;position:fixed;inset:0 0 0 auto;margin:0;width:min(680px,100vw);max-width:100vw;height:100dvh;max-height:100dvh;border:0;border-left:1px solid var(--lc-line);background:var(--lc-bg);color:var(--lc-ink);box-shadow:-10px 0 50px #0002;overflow:auto}
+#laser-catalog-v4 dialog.lc-wide {width:min(900px,100vw)}
+#laser-catalog-v4 dialog::backdrop {background:#10201966;backdrop-filter:blur(2px)}
+#laser-catalog-v4 .lc-dialog-head {display:flex;justify-content:space-between;gap:15px;padding:20px 24px;background:var(--lc-panel);border-bottom:1px solid var(--lc-line);position:sticky;top:0;z-index:4}
+#laser-catalog-v4 .lc-dialog-head h2 {font:500 25px/1.2 ui-serif,Georgia,serif}
+#laser-catalog-v4 .lc-dialog-head .lc-eyebrow {margin-bottom:6px}
+#laser-catalog-v4 #panel-body {padding:20px 24px}
+#laser-catalog-v4 .lc-form-grid {display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;margin:15px 0}
+#laser-catalog-v4 .lc-span {grid-column:1/-1}
+#laser-catalog-v4 .lc-form-grid label {font-size:12px;min-width:0}
+#laser-catalog-v4 .lc-form-grid small {display:block;color:var(--lc-soft);font-weight:400;font-size:11px;margin-top:4px}
+#laser-catalog-v4 textarea {display:block;resize:vertical;width:100%;min-height:74px;border:1px solid var(--lc-line);border-radius:6px;background:var(--lc-panel);color:var(--lc-ink);font:inherit;padding:9px;margin-top:4px}
+#laser-catalog-v4 .lc-form-actions {display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:14px 0 4px;margin-top:14px;border-top:1px solid var(--lc-line)}
+#laser-catalog-v4 .lc-section {border-top:1px solid var(--lc-line);padding-top:16px;margin-top:20px}
+#laser-catalog-v4 .lc-section>p {margin:8px 0;font-size:12px;color:var(--lc-soft)}
+#laser-catalog-v4 .lc-notice {padding:10px 12px;font-size:12px;background:var(--lc-tint);border-radius:6px;margin:10px 0}
+#laser-catalog-v4 .lc-error {padding:10px 12px;font-size:12px;background:var(--lc-red-bg);color:var(--lc-red);border-radius:6px;margin:10px 0}
+#laser-catalog-v4 .lc-error:empty {display:none}
+#laser-catalog-v4 .lc-warning {background:var(--lc-amber-bg);color:var(--lc-amber)}
+#laser-catalog-v4 .lc-toast {position:fixed;bottom:20px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 28px);padding:12px 16px;border:1px solid var(--lc-line);border-radius:8px;background:var(--lc-ink);color:var(--lc-panel);box-shadow:0 6px 30px #0003;z-index:10;font-size:13px}
+#laser-catalog-v4 .lc-toast button {color:inherit;background:transparent;border:0;text-decoration:underline;margin-left:12px}
+#laser-catalog-v4 .lc-export-tools {position:sticky;top:-20px;background:var(--lc-bg);padding:8px 0 12px;z-index:2}
+#laser-catalog-v4 .lc-export-group {margin:10px 0;border:1px solid var(--lc-line);border-radius:7px;background:var(--lc-panel);padding:8px 12px}
+#laser-catalog-v4 .lc-export-group>summary {font-size:13px;display:flex;align-items:center;gap:10px}
+#laser-catalog-v4 .lc-export-row {border-top:1px solid var(--lc-line);padding:9px 0}
+#laser-catalog-v4 .lc-export-row .lc-check {font-size:12px;align-items:flex-start}
+#laser-catalog-v4 .lc-export-row small {display:block;color:var(--lc-soft);font-size:11px}
+#laser-catalog-v4 .lc-export-values {display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:8px 0 0 25px}
+#laser-catalog-v4 .lc-export-values input {font-size:12px;min-height:32px;padding:5px}
+#laser-catalog-v4 .lc-test-preview {width:100%;max-height:280px;display:block;background:var(--lc-panel);border:1px solid var(--lc-line);border-radius:7px;margin:12px 0;color:var(--lc-ink)}
+#laser-catalog-v4 .lc-grid-cells {display:grid;grid-template-columns:repeat(var(--columns,3),minmax(0,1fr));gap:6px}
+#laser-catalog-v4 .lc-grid-cells button {display:block;text-align:left;font-size:11px;padding:9px}
+#laser-catalog-v4 .lc-grid-cells b {display:block;margin-bottom:2px}
+#laser-catalog-v4 .lc-test-context {font-size:12px;color:var(--lc-soft);margin:8px 0}
+#laser-catalog-v4 .lc-footer p+p {margin-top:9px}
+@container laser (max-width:750px) {
+ #laser-catalog-v4 .lc-toolbar {grid-template-columns:1fr 1fr}
+ #laser-catalog-v4 .lc-toolbar-actions {grid-column:1/-1}
+ #laser-catalog-v4 .lc-toolbar-actions .lc-btn {flex:1}
+ #laser-catalog-v4 .lc-search {grid-column:auto}
+ #laser-catalog-v4 .lc-machine-strip {gap:10px;flex-wrap:wrap}
+ #laser-catalog-v4 .lc-machine-strip label {width:auto;flex:1;min-width:160px}
+ #laser-catalog-v4 .lc-machine-strip p {order:3;flex-basis:100%}
+ #laser-catalog-v4 .lc-quicklist {padding:14px 15px}
+}
+@media(max-width:600px) {
+ #laser-catalog-v4 dialog {border:0;width:100vw}
+ #laser-catalog-v4 .lc-dialog-head {padding:16px}
+ #laser-catalog-v4 #panel-body {padding:16px}
+ #laser-catalog-v4 .lc-form-grid {gap:12px 9px}
+ #laser-catalog-v4 .lc-btn {min-height:42px}
+ #laser-catalog-v4 .lc-export-values {grid-template-columns:1fr 1fr}
+ #laser-catalog-v4 .lc-topline {font-size:10px}
+ #laser-catalog-v4 .lc-topline .lc-btn {font-size:10px;padding:4px}
+}

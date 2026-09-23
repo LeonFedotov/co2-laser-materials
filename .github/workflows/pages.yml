@@ -26,10 +26,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Validate workspace and standalone build
+        run: npm run check
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp index.html laser-materials.js .nojekyll _site/
+          cp index.html laser-materials.js catalog-overrides.json .nojekyll _site/
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

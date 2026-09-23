@@ -1,31 +1,50 @@
 # CO₂ Laser Material Catalog
 
-[Open the material catalog](https://lasercut.localheist.com/)
+[Open the catalog](https://lasercut.localheist.com/)
 
-An interactive catalog of 58 materials with isometric and edge previews, selectable stock thickness, and cutting and engraving instructions.
+A continuous library of 58 reference materials, with individual vector grain and edge previews, one selected cutting thickness, and cutting and engraving together in a compact expanded card.
 
-- Choose a rated CO₂ wattage: 40, 50, 60, 80, 100, or 120 W.
-- Matching manufacturer references cover 60, 80, 100, and 120 W where available.
-- Optional speed estimates are labeled and disabled by default.
-- Restricted materials remain visible with warnings.
-- Each recipe includes its evidence and source.
+## Workspace
 
-## Product plan
+- **Laser setup:** named profiles, custom dimensions and wattages, source and controller, separate cutting/engraving speed limits, maximum allowed command percentage, lens, air assist and advanced motion fields. Start with Studio CO₂: 400 × 400 mm, 60 W glass tube. Unknown limits remain blank; the suggested 2″ lens remains unconfirmed.
+- **Units and imports:** switch mm/s ↔ mm/min without reinterpreting stored speeds. Import supported Ruida or GRBL JSON `.lbset` dimensions and motion fields for review. Nothing is written to a controller.
+- **Materials:** add, edit, duplicate, archive/undo, restore, and permanently remove personal material records. Copies do not inherit tested status. Source recipes and warnings are preserved.
+- **Test history:** exact controller Min/Max power, speed, passes, date, focus, lens, air, interval, outcome, stock measurements and optional photo. Partial observations and failed tests remain in history. Successful complete tests can become preferred recipes for the same laser and stock setup.
+- **Quicklist:** pin a particular recipe, thickness, variant and laser; filter the catalog to pinned materials. Changed or unavailable contexts are shown explicitly.
+- **LightBurn library:** select all eligible, deselect all, or select filtered recipes. Material checkboxes show partial selection; hidden selections remain selected. Review the single values chosen from reference ranges before downloading `.clb` and setup notes.
+- **Test projects:** cutting and engraving grids, plus fit coupons. Preview the footprint against scrap size, margins, motion allowance and recorded machine limits. Download an editable `.lbrn2` project or SVG geometry, then reopen a downloaded grid to record a cell’s physical result.
 
-See the [UI and workflow plan](docs/ui-and-workflow-plan.md) for proposed laser profiles, material and test editing, quicklists, test-file generation, and selectable LightBurn exports.
+The existing **3 mm and 4 mm MDF reports remain dated 22 September 2026, through-cut in one pass**. Their exact speed/power pair was not recorded; the app does not treat an arbitrary point in the listed ranges as a verified exact preset.
 
-## Files
+## Saving and sharing
 
-- `index.html`: the complete standalone application, including material data and icons. Open directly in a browser; no installation or build is required.
-- `laser-materials.js`: the same material data as an ES module exporting `materials` and `catalogMeta`, for reuse in other tools. The standalone page embeds its own copy.
-- `.nojekyll`: serves the repository as static files on GitHub Pages.
+Personal changes save in this browser. **Backup, restore & sync** provides a JSON backup, restore review and optional GitHub connection. Back up before clearing browser data. Photos are limited to 600 KB each; storage errors are visible and leave the working copy available for download.
 
-## Publishing
+To sync across devices, create a **private GitHub repository**, then connect in the app with a fine-grained token granting Contents read/write for that repository. Load remote status before choosing upload or restore. Tokens remain in memory and are excluded from persistence and backups. Sync excludes photos; full JSON backups include them. Remote SHA checks reject concurrent changes rather than overwrite them.
 
-The GitHub Actions workflow in `.github/workflows/pages.yml` publishes the static files when a commit reaches `main`. It can also be run manually from the Actions tab. Pages must be enabled with **GitHub Actions** as the publishing source.
+The repository owner can review and publish material edits, new materials, archive changes and individually selected test reports to `catalog-overrides.json`. This is public information, including Git history. Personal profiles, pins and photos are not included in the publication payload; a selected test includes the machine/stock snapshot and notes needed to interpret it. The owner’s browser checks the connected identity, and GitHub independently enforces repository permissions.
 
-## Using the settings
+## LightBurn compatibility
 
-Manufacturer values are machine-specific references, not verified presets for every machine. Wattage alone does not provide an exact conversion. Unspecified combinations remain blank unless an eligible, explicitly labeled estimate is enabled. Observe the machine's current and motion limits, qualify the material, provide suitable extraction, and test on scrap.
+Load `.clb` files from LightBurn’s Material Library. Exported speeds are always **mm/s**, regardless of display units. Controller Min/Max are separate from a suggested power range; without reported controller values, equal Min/Max is an explicitly provisional starting choice. Unsupported or incomplete recipes, including the unverified MoS₂ powder recipe, remain unavailable for export. Conditional Delrin recipes retain their extraction/formaldehyde warnings.
 
-Source references and material-specific limitations are included in the catalog. Grain and layer counts in the previews are illustrative.
+**Test-project export is beta.** Generated XML is structurally checked against native LightBurn examples, with per-cell layer settings, millimeter geometry, labels on a non-output layer and no automatic Z movement. It has **not yet been opened in the native LightBurn desktop application**. Open `.lbrn2` in LightBurn, check layers and Preview, verify controller overscan/origin, and frame on scrap before running. SVG carries geometry only; its separate label group also requires deliberate layer assignment.
+
+## Development
+
+Node.js 20 or newer; no npm dependencies or install step.
+
+```sh
+npm run build   # regenerate index.html from editable sources
+npm test        # provenance, unit, backup, sync, geometry and export checks
+npm run check   # tests plus verification that committed HTML is current
+```
+
+- `laser-materials.js`: reusable source data as an array of objects; exports `materials` and `catalogMeta`.
+- `src/`: UI, domain logic, procedural previews, exports, sync and the existing bundled icons/analytics.
+- `scripts/build.mjs`: builds the complete standalone `index.html`. It can still be opened directly without a server. Shared catalog updates load when served over HTTP(S).
+- `catalog-overrides.json`: reviewed shared edits, separate from underlying reference data.
+- `docs/ui-and-workflow-plan.md`: original product scope and implementation status.
+- `docs/implementation-notes.md`: storage schema, matching rules and format references.
+
+GitHub Actions checks the source/build and publishes the static files to the existing Pages custom domain whenever `main` changes. The existing Matomo analytics configuration is preserved.
