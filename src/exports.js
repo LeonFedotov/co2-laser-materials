@@ -8,6 +8,48 @@ export function startingSettings(row) {
     intervalMm: row?.intervalMm ?? null, focusMm: typeof row?.focusBelowTopMm === 'number' ? row.focusBelowTopMm : row?.focusBelowTopMm?.min ?? null,
     lensInches: row?.lensInches ?? null, air: row?.airAssist || '', airOn: Boolean(row?.airAssist && !/^(off|none|no air)/i.test(row.airAssist)) };
 }
+export function profileStartingSettings(recipe, profile, process) {
+  const settings = startingSettings(recipe);
+  const limits = [process === 'cutting' ? profile.maxCutSpeed : profile.maxEngraveSpeed, profile.xMaxSpeed,
+    process === 'cutting' ? profile.yMaxSpeed : null].filter(positive);
+  const limit = limits.length ? Math.min(...limits) : Infinity;
+  // Choose a value inside the published range. Never rewrite a measured exact test or
+  // extrapolate a recipe whose entire speed range exceeds the machine's limit.
+  if (!recipe?.exactTest && positive(recipe?.speedMmPerSec?.min) && recipe.speedMmPerSec.min <= limit && settings.speed > limit) settings.speed = limit;
+  return settings;
+}
+export function surfaceTitle(recipe) {
+  if (recipe.method === 'Coating removal') return 'Coating removal';
+  if (recipe.method === 'Surface frosting') return 'Glass frosting';
+  if (recipe.method === 'Anodized-layer marking') return 'Surface marking';
+  return 'Engraving';
+}
+export function materialLibraryName(material) {
+  const families = {'Wood & cork':'Wood','Paper & board':'Paper & Cardboard','Metals':'Metal'};
+  const category = material.family === 'Foam & rubber' ? (/rubber|neoprene/.test(material.id) ? 'Rubber' : 'Foam') :
+    material.family === 'Glass & stone' ? (['slate','granite'].includes(material.id) ? 'Stone' : 'Glass & Ceramics') :
+    families[material.family] || material.family;
+  const qualifications = {acetal:' [FORMALDEHYDE - EXTRACTION REQUIRED]',eva:' [LASER-COMPATIBLE GRADE]',rubber:' [HALOGEN-FREE ONLY]',leatherette:' [LASER-RATED ONLY]'};
+  return `${category ? category + ' — ' : ''}${material.name.replace(/\s*\/\s*/g,' · ')}${qualifications[material.id] || ''}`;
+}
+export function recipeExportRow(material, process, selection, option, variant, profile) {
+  if (!option) return null;
+  const r = option.recipe, settings = profileStartingSettings(r,profile,process);
+  const reason = !positive(r.speedMmPerSec?.min) || !positive(r.powerPercent?.min) ? 'No verified numeric settings supplied.' :
+    /incomplete|unverified/i.test(r.evidence) && option.kind !== 'estimate' ? 'Reference has an incomplete setup. Record a complete test to create a preset.' :
+    !settings.passes ? 'Pass count is unspecified.' : process === 'engraving' && !positive(settings.intervalMm) ? 'Line interval is unspecified.' :
+    /stage|multi/i.test(r.passes || '') ? 'Staged recipes need separate, explicitly recorded settings.' : '';
+  return {key:recipeKey(material.id,process,r.id,variant),material,process,selection,variant,option,settings,reason,
+    speedAdjustment:settings.speed !== startingSettings(r).speed ? settings.speed : null};
+}
+export function singleRecipeExport(material, process, selection, recipeId, variant, profile, workspace, sharedTests = []) {
+  const option = choicesFor(material,process,selection,profile,workspace,variant,sharedTests).find(o => o.recipe.id === recipeId);
+  const row = recipeExportRow(material,process,selection,option,variant,profile);
+  if (!row) throw new Error('No matching recipe for this laser and stock.');
+  const slug = value => String(value).toLowerCase().replace(/[^a-z0-9.-]+/g,'-').replace(/^-|-$/g,'');
+  return {filename:`CO2-${profile.watts}W-${slug(material.id)}-${process === 'cutting' ? selection+'mm-cut' : slug(surfaceTitle(option.recipe))}-${slug(recipeId)}.clb`,
+    xml:libraryXml([row],new Set([row.key]),profile)};
+}
 export function exportRows(catalog, profile, workspace, archived = [], sharedTests = []) {
   const rows = new Map();
   for (const m of catalog.filter(m => !archived.includes(m.id))) {
@@ -15,12 +57,8 @@ export function exportRows(catalog, profile, workspace, archived = [], sharedTes
       for (const process of ['cutting','engraving']) {
         const selections = process === 'cutting' ? materialThicknesses(m, workspace.tests) : materialMethods(m, workspace.tests).map(v => v.id);
         for (const selection of selections) for (const option of choicesFor(m,process,selection,profile,workspace,variant,sharedTests)) {
-          const r = option.recipe, key = recipeKey(m.id,process,r.id,variant), settings = startingSettings(r);
-          const reason = !positive(r.speedMmPerSec?.min) || !positive(r.powerPercent?.min) ? 'No verified numeric settings supplied.' :
-            /incomplete|unverified/i.test(r.evidence) && option.kind !== 'estimate' ? 'Reference has an incomplete setup. Record a complete test to create a preset.' :
-            !settings.passes ? 'Pass count is unspecified.' : process === 'engraving' && !positive(settings.intervalMm) ? 'Line interval is unspecified.' :
-            /stage|multi/i.test(r.passes || '') ? 'Staged recipes need separate, explicitly recorded settings.' : '';
-          rows.set(key,{ key, material: m, process, selection, variant, option, settings, reason });
+          const row = recipeExportRow(m,process,selection,option,variant,profile);
+          rows.set(row.key,row);
         }
       }
     }
@@ -53,6 +91,7 @@ export function recipeDescription(row, settings, profile) {
   const evidence = r.exactTest && unchanged ? `TESTED ${r.testDate}` : 'TEST STARTING POINT — not an exact verified preset';
   return [r.id, row.process === 'cutting' ? `${r.thicknessMm} mm cut` : `Surface engraving · ${r.method}`, row.variant,
     evidence, `${profile.name}, ${profile.watts} W ${profile.source}`, `${settings.speed} mm/s; Min ${settings.minPower}%, Max ${settings.maxPower}%; ${settings.passes} pass(es)`,
+    row.speedAdjustment != null && settings.speed === row.speedAdjustment ? `Speed chosen within the original ${r.speedMmPerSec.min}–${r.speedMmPerSec.max} mm/s range to respect recorded machine limits; not a new physical test.` : '',
     `Focus below top: ${settings.focusMm ?? 'unspecified'} mm (manual); lens ${settings.lensInches ?? 'unspecified'} in; air ${settings.air || 'unspecified'}`,
     !r.controllerPowerPercent ? 'Controller Min=Max is a provisional choice, not a reported controller setting.' : '',
     r.testReport ? `Reported ${r.testDate}: ${r.testReport.passes} pass through-cut; exact speed/power not recorded.` : '',
@@ -71,12 +110,13 @@ export function libraryXml(rows, selected, profile) {
     if (!groups.has(row.material.id)) groups.set(row.material.id,[]);
     groups.get(row.material.id).push(row);
   }
-  return '<?xml version="1.0" encoding="UTF-8"?>\n<LightBurnLibrary>\n' + [...groups.values()].map(group => {
-    const name = group[0].material.name;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<LightBurnLibrary DisplayName="${esc(profile.name)} ${profile.watts} W">\n` + [...groups.values()].map(group => {
+    const name = materialLibraryName(group[0].material);
     return `<Material name="${esc(name)}">\n` + group.map(row => {
       const thickness = row.process === 'cutting' ? row.option.recipe.thicknessMm.toFixed(4) : '-1.0000';
+      const title = row.process === 'engraving' ? surfaceTitle(row.option.recipe) : null;
       const desc = recipeDescription(row,row.settings,profile);
-      return `<Entry Thickness="${thickness}" Desc="${esc(desc)}">${cutSettingXml(row.settings,row.process,0,desc,{linkPath:`${name}/${thickness}/${desc}`})}</Entry>`;
+      return `<Entry Thickness="${thickness}"${title ? ` NoThickTitle="${esc(title)}"` : ''} Desc="${esc(desc)}">${cutSettingXml(row.settings,row.process,0,desc,{linkPath:`${name}/${title || thickness}/${desc}`})}</Entry>`;
     }).join('\n') + '\n</Material>';
   }).join('\n') + '\n</LightBurnLibrary>\n';
 }

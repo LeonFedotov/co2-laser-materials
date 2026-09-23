@@ -1,7 +1,7 @@
 import { materials, catalogMeta } from '../laser-materials.js';
 import { materialPreview } from './preview.js';
-import { STORAGE_KEY, clone, uid, today, numberOrNull, positive, speedDisplay, speedStorage, esc, fmt, safeUrl, initialProfile, emptyWorkspace, profileSignature, stockSignature, validateProfile, testComplete, testSuccess, testMatches, validateTest, testRecipe, allMaterials, materialThicknesses, choicesFor, materialMethods, recipeContext, recipeKey, duplicateMaterial, deleteMaterial, validateMaterial, parseWorkspace, limitErrors } from './domain.js';
-import { startingSettings, exportRows, selectionSummary, parentSelection, libraryXml, recipeDescription, testPattern, patternSvg, projectXml } from './exports.js';
+import { STORAGE_KEY, clone, uid, today, numberOrNull, positive, speedDisplay, speedStorage, esc, fmt, safeUrl, initialProfile, applyStudioProfile, upgradeStudioProfile, emptyWorkspace, profileSignature, stockSignature, validateProfile, testComplete, testSuccess, testMatches, validateTest, testRecipe, allMaterials, materialThicknesses, choicesFor, materialMethods, recipeContext, recipeKey, duplicateMaterial, deleteMaterial, validateMaterial, parseWorkspace, limitErrors } from './domain.js';
+import { startingSettings, exportRows, recipeExportRow, singleRecipeExport, surfaceTitle, selectionSummary, parentSelection, libraryXml, recipeDescription, testPattern, patternSvg, projectXml } from './exports.js';
 import { GitHubConnection, importMachineSettings } from './sync.js';
 
 const root = document.querySelector('#laser-catalog-v4');
@@ -22,6 +22,7 @@ let catalog = [], connection = null, remotePrivate = null, sharedRevision = null
 let exportState = null, generatorState = null, testDraft = null, profileDraft = null;
 try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) workspace = parseWorkspace(raw,materials); } catch (error) { loadError = `Stored data could not be loaded: ${error.message} Download the recovery copy before restoring a backup.`; }
 storageRevision = workspace.updatedAt;
+const profileUpgraded = !loadError && upgradeStudioProfile(workspace);
 function profile() { return workspace.profiles.find(p => p.id === workspace.activeProfileId); }
 function archivedIds() { return [...new Set([...(shared.archivedIds || []),...workspace.archivedIds])].filter(id => !workspace.restoredIds?.includes(id)); }
 function allTests() { return [...workspace.tests,...shared.tests.filter(t => !workspace.tests.some(local=>local.id===t.id))]; }
@@ -67,9 +68,9 @@ function currentChoice(m,process) {
 }
 function renderHeader() {
   const p=profile();$('#profile-select').innerHTML=optionHtml(workspace.profiles.map(p=>[p.id,p.name]),p.id);
-  $('#profile-summary').textContent=`${p.widthMm} × ${p.heightMm} mm · ${p.watts} W ${p.source==='co2-glass'?'glass tube':'RF CO₂'} · ${p.controller || 'controller unspecified'}`;
+  $('#profile-summary').textContent=`${p.widthMm} × ${p.heightMm} mm · ${p.watts} W ${p.source==='co2-glass'?'glass tube':'RF CO₂'} · ${p.controller || 'controller unspecified'}${p.xMaxSpeed && p.yMaxSpeed ? ` · X/Y max ${fmt(speedDisplay(p.xMaxSpeed,p.unit))}/${fmt(speedDisplay(p.yMaxSpeed,p.unit))} ${p.unit}` : ''}`;
   $('#estimates').checked=workspace.allowEstimates;
-  $('#reference-note').textContent=`${p.watts} W references${p.source==='co2-rf'?' unavailable for RF; only your matching tests are shown':''}. ${workspace.allowEstimates?'Speed estimates are labeled; test on scrap.':'Estimates are off.'} ${p.maxPowerPercent==null || p.maxCutSpeed==null || p.maxEngraveSpeed==null ? 'Machine limits are unconfirmed — review Laser setup.' : ''}`;
+  $('#reference-note').textContent=`${p.watts} W references${p.source==='co2-rf'?' unavailable for RF; only your matching tests are shown':''}. ${workspace.allowEstimates?'Speed estimates are labeled; test on scrap.':'Estimates are off.'} ${p.maxPowerPercent==null || p.maxCutSpeed==null || p.maxEngraveSpeed==null ? (p.xMaxSpeed && p.yMaxSpeed ? 'Recorded motion limits apply; allowed power and practical job limits still need confirmation.' : 'Machine limits are unconfirmed — review Laser setup.') : ''}`;
   const value=$('#catalog-family').value;$('#catalog-family').innerHTML=optionHtml([['','All families'],...[...new Set(catalog.map(m=>m.family))].sort()],value);
   $('#archive-count').textContent=archivedIds().length?`(${archivedIds().length})`:''; updateSaveState();
 }
@@ -93,11 +94,15 @@ function processPanel(m,process) {
     `<label>Engraving method<select data-method="${m.id}">${optionHtml(materialMethods(m,allTests()).map(t=>[t.id,t.label]),s.method)}</select></label>`;
   const recipeControl=choices.length>1?`<label>Recipe / reference<select data-recipe="${m.id}" data-process="${process}">${optionHtml(choices.map(c=>[c.recipe.id,`${c.recipe.id} · ${c.recipe.exactTest?'Your tested recipe':c.kind==='estimate'?'Speed estimate':c.kind==='published'?'Thunder Nova':'Original catalog'}`]),r?.id)}</select></label>`:'';
   const settings=r?startingSettings(r):null;
+  const exportRow=recipeExportRow(m,process,cut?s.thickness:s.method,selected,s.variant,profile());
+  const downloadReason=exportRow ? exportRow.reason || limitErrors(exportRow.settings,profile(),process).join(' ') : 'No matching recipe for this laser and stock.';
+  const downloadLabel=cut?`${fmt(s.thickness)} mm`:r?surfaceTitle(r):'Engraving';
   const speed=r?`${rangeText(r.speedMmPerSec,true)} ${profile().unit}`:'—';
   const power=r?.controllerPowerPercent?`${fmt(r.controllerPowerPercent.max)}% max / ${fmt(r.controllerPowerPercent.min)}% min`:r?`${rangeText(r.powerPercent)}% window`:'—';
   const pin=workspace.pins.find(p=>p.materialId===m.id && p.recipeId===r?.id && p.profileId===profile().id && p.thicknessMm===s.thickness && p.variant===s.variant && p.process===process);
   const metrics=r?[['Speed',speed],['Power',power],['Passes',r.passes || 'Unspecified'],['Focus below top',settings.focusMm==null?'Unspecified':`${fmt(settings.focusMm)} mm`],['Lens',r.lensInches?`${r.lensInches}″`:'Unspecified'],...(cut?[]:[['Interval',r.intervalMm?`${fmt(r.intervalMm)} mm`:'Unspecified']])]:[];
   return `<section class="lc-process" aria-label="${cut?'Cutting':'Engraving'}"><h3>${icon(cut?'scissors':'scan-line')}${cut?'Cutting':'Engraving & marking'}</h3><div class="lc-inline-fields">${control}${recipeControl}</div>
+    <div class="lc-recipe-download"><button class="lc-btn" data-action="download-material" data-id="${m.id}" data-process="${process}" aria-label="Download ${esc(m.name)} ${esc(downloadLabel)} .clb" ${downloadReason?'disabled':''}>${icon('download')}Download ${esc(downloadLabel)} .clb</button><small>${downloadReason?esc(downloadReason):`One preset · ${esc(r.id)} · ${fmt(speedDisplay(exportRow.settings.speed,profile().unit))} ${profile().unit}${exportRow.speedAdjustment!=null?' (adjusted to machine limit; untested)':''}<br>Add with LightBurn’s Merge Library With.`}</small></div>
     ${r?`<p class="lc-evidence" data-kind="${selected.kind}">${esc(r.evidence)}</p><dl class="lc-settings">${metrics.map(([label,value])=>`<div><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>
     ${r.testReport?`<p class="lc-notice">${r.testReport.thicknessMm} mm MDF: through-cut in one pass · 22 Sep 2026. Exact speed/power pair was not recorded.</p>`:''}
     ${r.warning?`<p class="lc-unverified">${esc(r.warning)}</p>`:''}
@@ -147,8 +152,18 @@ function renderMaterial(id) {
 }
 
 function openProfile(id=profile().id) {
-  profileDraft=clone(workspace.profiles.find(p=>p.id===id) || {...initialProfile(),id:uid('laser'),name:'New laser',model:'Custom',provenance:{widthMm:'Template · unconfirmed',heightMm:'Template · unconfirmed',watts:'Template · unconfirmed',lensInches:'Suggested · unconfirmed'}});
+  profileDraft=clone(workspace.profiles.find(p=>p.id===id) || {...initialProfile({machine:false}),id:uid('laser'),name:'New laser',model:'Custom',provenance:{widthMm:'Template · unconfirmed',heightMm:'Template · unconfirmed',watts:'Template · unconfirmed',lensInches:'Suggested · unconfirmed'}});
   profileForm();
+}
+function controllerRecord(p) {
+  const s=p.machineSettings;if(!s)return '';
+  const flag=value=>value==null?'Unspecified':value?'Enabled':'Disabled';
+  const rows=[['Controller start speed',`${fmt(s.startSpeed)} mm/s`],['Idle travel speed',`${fmt(s.idleSpeed)} mm/s`],
+    ['Cutting acceleration',`${fmt(s.cuttingAcceleration)} mm/s²`],['X / Y axis max acceleration',`${fmt(s.xMaxAcceleration)} / ${fmt(s.yMaxAcceleration)} mm/s²`],
+    ['Laser 1 firmware Min / Max',`${fmt(s.laser1MinPercent)} / ${fmt(s.laser1MaxPercent)}%`],['Laser 1 PWM frequency',`${fmt(s.laser1FrequencyHz)} Hz`],
+    ['Air-assist output',flag(s.airAssistOutputEnabled)],['Rotary',flag(s.rotaryEnabled)],['Multiple tubes',flag(s.multiTubeEnabled)],
+    ['Water-protection input',flag(s.waterProtectionEnabled)],['Door-protection input',flag(s.doorProtectionEnabled)]];
+  return `<details class="lc-section"><summary>Imported controller record</summary><p class="lc-minor">${esc(s.sourceFile || 'Ruida .lbset backup')}</p><table class="lc-machine-record"><tbody>${rows.map(([key,value])=>`<tr><th scope="row">${esc(key)}</th><td>${esc(value)}</td></tr>`).join('')}</tbody></table><p class="lc-minor">Firmware Min/Max are controller configuration, not a measured firing threshold or a safe tube-current limit. Air output enabled does not establish airflow or pressure.</p>${s.waterProtectionEnabled===false || s.doorProtectionEnabled===false?'<p class="lc-notice">The controller backup records disabled protection inputs as shown above. This file does not establish whether separate hardware interlocks are installed.</p>':''}</details>`;
 }
 function profileForm() {
   const p=profileDraft;
@@ -171,13 +186,14 @@ function profileForm() {
     </div><details class="lc-section"><summary>Advanced machine settings</summary><div class="lc-form-grid">
       ${selectField('origin','Origin',[['','Unspecified'],'rear-left','rear-right','front-left','front-right'],p.origin)}<label class="lc-check"><input type="checkbox" name="motorizedZ" ${p.motorizedZ?'checked':''}>Motorized Z confirmed</label>
       ${num('xMaxSpeed','X-axis max speed · '+p.unit,speedDisplay(p.xMaxSpeed,p.unit),'min="0.001"')}${num('yMaxSpeed','Y-axis max speed · '+p.unit,speedDisplay(p.yMaxSpeed,p.unit),'min="0.001"')}
-      ${num('xAcceleration','X acceleration · mm/s²',p.xAcceleration,'min="0.001"')}${num('yAcceleration','Y acceleration · mm/s²',p.yAcceleration,'min="0.001"')}
+      ${num('xAcceleration','X engraving acceleration · mm/s²',p.xAcceleration,'min="0.001"')}${num('yAcceleration','Y engraving acceleration · mm/s²',p.yAcceleration,'min="0.001"')}
+      ${num('xStepLengthUm','X calibrated step length · µm',p.xStepLengthUm,'min="0.000001"',p.provenance.xStepLengthUm)}${num('yStepLengthUm','Y calibrated step length · µm',p.yStepLengthUm,'min="0.000001"',p.provenance.yStepLengthUm)}
       ${num('tubeCurrentMa','Tube-current limit · mA',p.tubeCurrentMa,'min="0.001"')}${num('firingPercent','Minimum firing command · %',p.firingPercent,'min="0.01" max="100"')}
-    </div><p class="lc-minor">These values are records of your setup. Import and export do not write firmware settings or command Z motion.</p></details>${formActions('Save laser')}</form>`);
+    </div><p class="lc-minor">These values are records of your setup. Import and export do not write firmware settings or command Z motion.</p></details>${controllerRecord(p)}${formActions('Save laser')}</form>`);
 }
 function readProfileForm(form) {
   const data=dataOf(form),next={...clone(profileDraft),name:data.name.trim(),model:data.model.trim(),source:data.source,controller:data.controller.trim(),air:data.air,origin:data.origin,unit:data.unit,lensConfirmed:Boolean(data.lensConfirmed),motorizedZ:Boolean(data.motorizedZ)};
-  for(const key of ['widthMm','heightMm','watts','maxPowerPercent','lensInches','xAcceleration','yAcceleration','tubeCurrentMa','firingPercent']) next[key]=readNum(data,key);
+  for(const key of ['widthMm','heightMm','watts','maxPowerPercent','lensInches','xAcceleration','yAcceleration','tubeCurrentMa','firingPercent','xStepLengthUm','yStepLengthUm']) next[key]=readNum(data,key);
   for(const key of ['maxCutSpeed','maxEngraveSpeed','xMaxSpeed','yMaxSpeed']) next[key]=speedStorage(readNum(data,key),profileDraft.unit);
   for(const key of Object.keys(next)) if(['string','number'].includes(typeof next[key]) && next[key]!==profileDraft[key]) next.provenance[key]='User entered';
   return next;
@@ -245,6 +261,7 @@ function renderExport() {
   $('#export-rows').innerHTML=[...grouped.values()].map(rows=>`<details class="lc-export-group" open><summary><input type="checkbox" data-export-parent="${rows[0].material.id}" aria-label="Select ${esc(rows[0].material.name)} recipes"><b>${esc(rows[0].material.name)}</b><span class="lc-minor">${rows.length} recipes</span></summary>
     ${rows[0].material.warnings.length?`<p class="lc-warning-detail lc-minor">${rows[0].material.warnings.map(w=>esc(w.label+': '+w.reason)).join(' ')}</p>`:''}
     ${rows.map(row=>{const index=exportState.rows.indexOf(row),r=row.option.recipe,s=row.settings;return `<div class="lc-export-row"><label class="lc-check"><input type="checkbox" data-export-row="${index}" ${exportState.selected.has(row.key)?'checked':''} ${row.reason?'disabled':''}><span><b>${row.process==='cutting'?fmt(r.thicknessMm)+' mm · Cut':'Surface · Engrave'}${row.variant?' · '+esc(row.variant):''}</b> · ${esc(r.id)}<small>${esc(row.reason || (r.exactTest?'Exact successful test · '+r.testDate:'Starting point · '+r.evidence))}</small></span></label>
+      ${row.speedAdjustment!=null && s.speed===row.speedAdjustment?`<p class="lc-minor">Starting speed ${fmt(speedDisplay(s.speed,profile().unit))} ${profile().unit} uses the recorded motion limit within the original ${rangeText(r.speedMmPerSec,true)} ${profile().unit} range. This adjustment is untested.</p>`:''}
       ${row.baseReason?'':`<div class="lc-export-values">${[['speed','Speed · '+profile().unit,speedDisplay(s.speed,profile().unit)],['minPower','Min · %',s.minPower],['maxPower','Max · %',s.maxPower],['passes','Passes',s.passes]].map(([key,label,value])=>`<label>${label}<input type="number" step="${key==='passes'?'1':'any'}" min="${key==='minPower'?'0':'0.001'}" ${key.includes('Power')?'max="100"':''} value="${fmt(value)}" data-export-value="${index}" data-key="${key}" aria-label="${esc(row.material.name)} ${esc(r.id)} ${label}"></label>`).join('')}</div>`}
     </div>`;}).join('')}</details>`).join('') || '<p class="lc-notice">No matching recipes. Try another filter.</p>';
   updateExportCounts();icons();
@@ -366,6 +383,7 @@ const actions = {
   unpin:button=>{workspace.pins=workspace.pins.filter(p=>p.id!==button.dataset.id);save();renderQuicklist();if(expandedId)renderMaterial(expandedId);filterCatalog();icons();},
   'open-pin':button=>{const pin=workspace.pins.find(p=>p.id===button.dataset.id),stale=pinStatus(pin);if(stale){toast(stale+'. The saved shortcut has not been redirected.');return;}workspace.activeProfileId=pin.profileId;const m=materialById(pin.materialId),s=stock(m);Object.assign(s,{thickness:pin.thicknessMm,variant:pin.variant,method:pin.methodId,[pin.process+'Recipe']:pin.recipeId});expandedId=m.id;$('#catalog-search').value='';$('#catalog-family').value='';save();renderCatalog();$('#material-'+m.id).scrollIntoView({block:'center',behavior:'smooth'});},
   export:openExport,
+  'download-material':button=>{const m=materialById(button.dataset.id),process=button.dataset.process,s=stock(m),r=currentChoice(m,process).selected?.recipe;const file=singleRecipeExport(m,process,process==='cutting'?s.thickness:s.method,r?.id,s.variant,profile(),workspace,shared.tests);download(file.filename,file.xml,'application/xml');toast('One preset downloaded. In LightBurn, choose Manage Library → Merge Library With to add it to your current library.');},
   'export-all':()=>{for(const r of exportState.rows)if(!r.reason)exportState.selected.add(r.key);renderExport();},
   'export-none':()=>{exportState.selected.clear();renderExport();},
   'export-filtered':()=>{for(const r of filteredExportRows())if(!r.reason)exportState.selected.add(r.key);renderExport();},
@@ -412,11 +430,11 @@ root.addEventListener('change',async event=>{
     if(target.closest('#profile-form')&&target.name==='unit'){const next=readProfileForm($('#profile-form'));profileDraft=next;profileForm();}
     if(target.closest('#profile-form')&&target.name==='model'){
       profileDraft=readProfileForm($('#profile-form'));const presets={'Studio CO₂ — 400 × 400 / 60 W':[400,400,60],'Generic desktop — 300 × 200 / 40 W':[300,200,40],'Generic cabinet — 600 × 400 / 60 W':[600,400,60],'Generic cabinet — 900 × 600 / 100 W':[900,600,100]};
-      if(presets[target.value]){[profileDraft.widthMm,profileDraft.heightMm,profileDraft.watts]=presets[target.value];for(const key of ['widthMm','heightMm','watts'])profileDraft.provenance[key]='Model template · unconfirmed';profileForm();}
+      if(presets[target.value]){[profileDraft.widthMm,profileDraft.heightMm,profileDraft.watts]=presets[target.value];for(const key of ['widthMm','heightMm','watts'])profileDraft.provenance[key]='Model template · unconfirmed';if(target.value==='Studio CO₂ — 400 × 400 / 60 W')profileDraft=applyStudioProfile(profileDraft);profileForm();}
     }
     if(target.id==='machine-file'&&target.files[0]){
       if($('#profile-form'))profileDraft=readProfileForm($('#profile-form'));
-      const result=importMachineSettings(await target.files[0].text());Object.assign(profileDraft,result.changes);for(const key of Object.keys(result.changes))profileDraft.provenance[key]='Imported · review before saving';profileForm();$('#form-error').className='lc-notice';$('#form-error').textContent='Imported for review: '+result.details.map(d=>`${d.field}: ${d.value}`).join('; ')+'. Rated watts, job limits, lens and origin are unchanged. Save laser to apply.';
+      const result=importMachineSettings(await target.files[0].text(),target.files[0].name);Object.assign(profileDraft,result.changes);for(const key of Object.keys(result.changes))profileDraft.provenance[key]='Imported · review before saving';profileForm();$('#form-error').className='lc-notice';$('#form-error').textContent='Imported for review: '+result.details.map(d=>`${d.field}: ${d.value}`).join('; ')+'. Rated watts, job limits, lens and origin are unchanged. Save laser to apply.';
     }
     if(target.id==='export-filter'){exportState.filter=target.value;renderExport();}
     if(target.dataset.exportRow!=null){const row=exportState.rows[Number(target.dataset.exportRow)];target.checked?exportState.selected.add(row.key):exportState.selected.delete(row.key);updateExportCounts();}
@@ -464,6 +482,7 @@ root.addEventListener('submit',async event=>{
 root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('#panel').open&&expandedId){const id=expandedId;expandedId='';renderMaterial(id);$('#material-'+id)?.querySelector('.lc-tile-button')?.focus();}});
 window.addEventListener('storage',event=>{if(event.key===STORAGE_KEY&&event.newValue){if($('#panel').open){saveError='Another tab changed this workspace · back up and reload';updateSaveState();toast(saveError);}else{try{workspace=parseWorkspace(event.newValue,materials);storageRevision=workspace.updatedAt;renderCatalog();toast('Workspace updated from another tab.');}catch{toast('Another tab saved incompatible data. Download a backup before reloading.');}}}});
 
+if(profileUpgraded)save();
 renderCatalog();
 if(loadError){saveError='Recovery needed · stored data preserved';updateSaveState();toast(loadError);}
 if(location.protocol==='http:'||location.protocol==='https:'){

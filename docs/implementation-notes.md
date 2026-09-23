@@ -25,6 +25,7 @@ Supported `.lbset` input is LightBurn JSON with `Name` and a `Settings` array of
 | Field | Ruida ID | GRBL ID |
 | --- | --- | --- |
 | Work width / height | `0x26` / `0x36` | `0x82` / `0x83` |
+| X / Y calibrated step length (µm) | `0x21` / `0x31` | — |
 | X / Y maximum motion speed | `0x23` / `0x33` | `0x6e` / `0x6f` |
 | X / Y engraving acceleration (Ruida); axis acceleration (GRBL) | `0x225` / `0x235` | `0x78` / `0x79` |
 
@@ -32,7 +33,7 @@ GRBL speed values are divided by 60 (mm/min → mm/s). Rated optical watts, prac
 
 ## Export details and limits
 
-Library recipe IDs are compound material/operation/recipe/variant keys because some source IDs are shared across materials. Surface engraving uses native `Thickness="-1.0000"`. A reference power range is not interpreted as controller Min/Max. Incomplete references cannot become presets merely by selecting them. The two MDF reports retain their date and one-pass result but remain starting points when converted into a specific numeric pair.
+Library recipe IDs are compound material/operation/recipe/variant keys because some source IDs are shared across materials. Surface engraving uses native `Thickness="-1.0000"` plus `NoThickTitle` and matching title-based link paths. Titles are Engraving, Glass frosting, Coating removal or Surface marking. A reference power range is not interpreted as controller Min/Max. Incomplete references cannot become presets merely by selecting them. The two MDF reports retain their date and one-pass result but remain starting points when converted into a specific numeric pair.
 
 Test grids support up to 5 × 5 cells, with one layer per cell, starting at highest speed/lowest power. Labels use layer 29, laser disabled and Output OFF. Shape coordinates are in millimeters; Y is converted from screen coordinates to LightBurn's Y-up geometry. Fit coupons include an inside slot (stock thickness plus allowance) and a mating tab coupon, with no kerf compensation. Focus is documented but Z motion stays disabled.
 
@@ -49,3 +50,37 @@ Automated checks cover unit conversions, MDF evidence, snapshot matching, duplic
 - [Native LightBurn rectangle and text samples](https://github.com/jlucaso1/lbrn2-to-svg/tree/main/tests/artifacts)
 - [Native layer-setting example](https://github.com/MarcinZukowski/lightburn-tester/blob/master/examples/example1.lbrn)
 - [GitHub Contents API and conditional SHA updates](https://docs.github.com/en/rest/repos/contents)
+
+## Recorded Studio machine update
+
+`src/studio-profile.js` holds values derived from the user-supplied
+`tests/fixtures/laser-axis-calibrated.lbset`. The fixture is the unchanged backup,
+retained for parser regression checks; no machine parameters are written to hardware.
+Its SHA-256 is recorded with the profile. Rated 60 W comes from the established
+setup, since the backup does not specify optical wattage.
+
+X/Y limits are 500/400 mm/s. Horizontal engraving uses the X limit; cutting
+checks both axes. Engraving acceleration is 8000/2000 mm/s², distinct from
+the firmware's 10000/3000 mm/s² axis maxima and 2000 mm/s² cutting acceleration.
+Calibrated step lengths are 3.178801 and 3.182771 µm.
+
+Ruida Laser 1 firmware Min/Max is 1/99%, PWM is 20000 Hz, and Start Speed
+is 10 mm/s. These do not establish safe tube current, a firing threshold or
+per-layer Min/Max. Air-assist output is enabled; actual airflow/pressure is
+unknown. Water and door protection switches are disabled in the backup, which
+does not establish the presence or absence of independent hardware interlocks.
+Z/U parameter blocks do not prove that those axes are physically installed.
+
+Legacy Studio profiles are upgraded only when their machine identity and
+recorded fields are compatible. Custom command limits and all test snapshots,
+photos, pins and material edits are retained. Conflicting profiles are left
+unchanged. The existing Studio template can explicitly apply the recorded setup.
+New custom profiles use unconfirmed template defaults, without Studio calibration.
+
+Six downloadable-library surface presets (E26, E27 and four E28 entries) formerly
+selected 600 mm/s from 400–600 mm/s reference ranges. Their new starting speed is
+500 mm/s with existing power, interval and pass count. The UI applies the same
+within-range rule and labels the adjustment. These are untested starting points;
+reference ranges and exact measured recipes are never modified. If no value in
+a reference range satisfies a recorded speed limit, the export remains blocked
+until the user supplies an appropriate setting.

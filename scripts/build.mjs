@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 const read = path => readFile(new URL('../' + path, import.meta.url), 'utf8');
-const modules = ['laser-materials.js','src/preview.js','src/references.js','src/domain.js','src/exports.js','src/sync.js','src/app.js'];
+const modules = ['laser-materials.js','src/preview.js','src/references.js','src/studio-profile.js','src/domain.js','src/exports.js','src/sync.js','src/app.js'];
 const script = (await Promise.all(modules.map(read))).map(text => text.replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'')).join('\n');
 const styles = await read('src/catalog.css'), vendor = await read('src/vendor/lucide.js'), analytics = await read('src/analytics.html');
 const html = (await read('src/shell.html')).replace('/* STYLES */', () => styles)

@@ -1,4 +1,5 @@
 import { resolveSettings, thicknessOptions, engravingOptions } from './references.js';
+import { studioProfilePatch } from './studio-profile.js';
 
 export const STORAGE_KEY = 'co2-material-workspace-v1';
 export const clone = value => structuredClone(value);
@@ -12,20 +13,39 @@ export const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'
 export const fmt = value => value == null ? '—' : String(Number(Number(value).toFixed(3)));
 export const safeUrl = value => { try { const u = new URL(value); return ['https:', 'http:'].includes(u.protocol) ? u.href : ''; } catch { return ''; } };
 
-export function initialProfile() {
-  return { id: 'studio-co2', name: 'Studio CO₂', model: 'Custom', source: 'co2-glass', widthMm: 400, heightMm: 400,
+export function initialProfile({ machine = true } = {}) {
+  const p = { id: 'studio-co2', name: 'Studio CO₂', model: 'Custom', source: 'co2-glass', widthMm: 400, heightMm: 400,
     watts: 60, maxPowerPercent: null, maxCutSpeed: null, maxEngraveSpeed: null, controller: '', lensInches: 2,
     lensConfirmed: false, air: '', unit: 'mm/s', origin: '', motorizedZ: false, xMaxSpeed: null, yMaxSpeed: null,
     xAcceleration: null, yAcceleration: null, tubeCurrentMa: null, firingPercent: null,
     provenance: { widthMm: 'Known setup', heightMm: 'Known setup', watts: 'Known setup', source: 'Known setup', lensInches: 'Suggested · unconfirmed' } };
+  return machine ? applyStudioProfile(p) : p;
+}
+export function applyStudioProfile(p) {
+  const patch = clone(studioProfilePatch), provenance = {...p.provenance};
+  for (const key of Object.keys(patch)) provenance[key] = `Imported · ${patch.machineSettings.sourceFile}`;
+  return {...clone(p), ...patch, provenance};
+}
+export function upgradeStudioProfile(workspace) {
+  const p = workspace.profiles.find(p => p.id === 'studio-co2');
+  if (!p || p.machineSettings?.sourceSha256 === studioProfilePatch.machineSettings.sourceSha256) return false;
+  // Only update the original Studio machine, preserving custom limits and every historical snapshot.
+  if (p.watts !== 60 || p.source !== 'co2-glass' || p.widthMm !== 400 || p.heightMm !== 400) return false;
+  for (const key of Object.keys(studioProfilePatch).filter(key => key !== 'machineSettings')) {
+    if (p[key] != null && p[key] !== '' && p[key] !== studioProfilePatch[key]) return false;
+  }
+  workspace.profiles[workspace.profiles.indexOf(p)] = applyStudioProfile(p);
+  return true;
 }
 export function emptyWorkspace() {
   return { schemaVersion: 1, profiles: [initialProfile()], activeProfileId: 'studio-co2', materialEdits: {}, customMaterials: [],
     archivedIds: [], deletedIds: [], tests: [], pins: [], preferred: {}, selections: {}, generatedTests: [], allowEstimates: false, updatedAt: null };
 }
 export function profileSignature(p) {
-  return JSON.stringify(['source','watts','widthMm','heightMm','controller','lensInches','air','maxPowerPercent',
-    'maxCutSpeed','maxEngraveSpeed','origin','motorizedZ','xMaxSpeed','yMaxSpeed','xAcceleration','yAcceleration','tubeCurrentMa','firingPercent'].map(k => p[k] ?? null));
+  const original = ['source','watts','widthMm','heightMm','controller','lensInches','air','maxPowerPercent',
+    'maxCutSpeed','maxEngraveSpeed','origin','motorizedZ','xMaxSpeed','yMaxSpeed','xAcceleration','yAcceleration','tubeCurrentMa','firingPercent'].map(k => p[k] ?? null);
+  const recorded = [p.xStepLengthUm,p.yStepLengthUm,p.machineSettings?.startSpeed,p.machineSettings?.laser1MinPercent,p.machineSettings?.laser1MaxPercent].map(value => value ?? null);
+  return JSON.stringify(recorded.some(value => value != null) ? original.concat(recorded) : original);
 }
 export function stockSignature(m, thickness, variant = '') {
   return JSON.stringify([m.id, m.composition || '', m.grade || '', m.supplier || '', thickness, variant]);
@@ -34,7 +54,7 @@ export function validateProfile(p) {
   const errors = [];
   if (!p.name?.trim()) errors.push('Give this laser a name.');
   for (const [key,label] of [['widthMm','Work width'],['heightMm','Work height'],['watts','Rated watts']]) if (!positive(p[key])) errors.push(`${label} must be greater than zero.`);
-  for (const key of ['maxCutSpeed','maxEngraveSpeed','lensInches','xMaxSpeed','yMaxSpeed','xAcceleration','yAcceleration','tubeCurrentMa']) {
+  for (const key of ['maxCutSpeed','maxEngraveSpeed','lensInches','xMaxSpeed','yMaxSpeed','xAcceleration','yAcceleration','tubeCurrentMa','xStepLengthUm','yStepLengthUm']) {
     if (p[key] != null && !positive(p[key])) errors.push(`${key} must be positive or unspecified.`);
   }
   for (const key of ['maxPowerPercent','firingPercent']) if (p[key] != null && (!Number.isFinite(p[key]) || p[key] <= 0 || p[key] > 100)) errors.push('Power limits must be between 0 and 100%.');

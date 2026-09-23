@@ -37,14 +37,14 @@ export class GitHubConnection {
   }
 }
 
-export function importMachineSettings(text) {
+export function importMachineSettings(text, sourceFile = '') {
   if(text.length>1_000_000)throw new Error('Machine settings file is too large.');
   let data;try{data=JSON.parse(text);}catch{throw new Error('Expected a LightBurn JSON .lbset backup. No settings were changed.');}
   if(!Array.isArray(data.Settings))throw new Error('No supported LightBurn Settings array found.');
   const values=new Map(data.Settings.map(row=>[String(row.ID).toLowerCase(),row]));
   const ruida=/^ruida/i.test(data.Name || ''),grbl=/grbl/i.test(data.Name || '');
   if(!ruida&&!grbl)throw new Error('This importer supports Ruida and GRBL JSON backups. Other controllers remain unchanged.');
-  const mapping=ruida?{widthMm:'0x26',heightMm:'0x36',xMaxSpeed:'0x23',yMaxSpeed:'0x33',xAcceleration:'0x225',yAcceleration:'0x235'}:
+  const mapping=ruida?{widthMm:'0x26',heightMm:'0x36',xMaxSpeed:'0x23',yMaxSpeed:'0x33',xAcceleration:'0x225',yAcceleration:'0x235',xStepLengthUm:'0x21',yStepLengthUm:'0x31'}:
     {widthMm:'0x82',heightMm:'0x83',xMaxSpeed:'0x6e',yMaxSpeed:'0x6f',xAcceleration:'0x78',yAcceleration:'0x79'};
   const changes={controller:ruida?'Ruida':'GRBL'},details=[];
   for(const [field,id] of Object.entries(mapping)) {
@@ -54,5 +54,14 @@ export function importMachineSettings(text) {
   }
   if(ruida && values.get('0x100003')?.Value==='Glass Tube')changes.source='co2-glass';
   if(!details.length)throw new Error('No supported dimensions or motion settings found.');
+  if(ruida) {
+    const numeric=id=>{const v=values.get(id)?.Value;return typeof v==='number'&&Number.isFinite(v)?v:null;};
+    const flag=id=>typeof values.get(id)?.Value==='boolean'?values.get(id).Value:null;
+    changes.machineSettings={sourceFile,controller:'Ruida',startSpeed:numeric('0x201'),idleSpeed:numeric('0x5'),
+      cuttingAcceleration:numeric('0x202'),xMaxAcceleration:numeric('0x25'),yMaxAcceleration:numeric('0x35'),
+      laser1MinPercent:numeric('0x12'),laser1MaxPercent:numeric('0x13'),laser1FrequencyHz:numeric('0x11'),
+      airAssistOutputEnabled:flag('0x40002'),waterProtectionEnabled:flag('0x40020'),doorProtectionEnabled:flag('0x40001'),
+      rotaryEnabled:flag('0x2260001'),multiTubeEnabled:flag('0x108000')};
+  }
   return {changes,details,skipped:data.Settings.length-details.length};
 }
