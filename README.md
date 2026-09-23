@@ -10,6 +10,10 @@ An interactive catalog of 58 materials with isometric and edge previews, selecta
 - Restricted materials remain visible with warnings.
 - Each recipe includes its evidence and source.
 
+## Product plan
+
+See the [UI and workflow plan](docs/ui-and-workflow-plan.md) for proposed laser profiles, material and test editing, quicklists, test-file generation, and selectable LightBurn exports.
+
 ## Files
 
 - `index.html`: the complete standalone application, including material data and icons. Open directly in a browser; no installation or build is required.
